@@ -2,447 +2,569 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>TB Dictation Test</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>TB Treatment Plan</title>
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-
-  body {
-    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
-    background: #0f1117;
-    color: #e8eaf0;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 40px 20px 60px;
-  }
-
-  header {
-    text-align: center;
-    margin-bottom: 36px;
-  }
-
-  .logo {
-    font-size: 11px;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    color: #5b8fff;
-    font-weight: 600;
-    margin-bottom: 8px;
-  }
-
-  h1 {
-    font-size: 26px;
-    font-weight: 700;
-    color: #fff;
-    letter-spacing: -0.02em;
-  }
-
-  h1 span {
-    color: #5b8fff;
-  }
-
-  .subtitle {
-    font-size: 13px;
-    color: #6b7280;
-    margin-top: 6px;
-  }
-
-  .card {
-    background: #1a1d27;
-    border: 1px solid #2a2d3a;
-    border-radius: 16px;
-    padding: 24px;
-    width: 100%;
-    max-width: 420px;
-    margin-bottom: 16px;
-  }
-
-  .card-label {
-    font-size: 10px;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: #5b8fff;
-    font-weight: 600;
-    margin-bottom: 14px;
-  }
-
-  /* Mic button */
-  .mic-wrap {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 16px;
-  }
-
-  #micBtn {
-    width: 88px;
-    height: 88px;
-    border-radius: 50%;
-    border: none;
-    background: #1e2235;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: background 0.2s, transform 0.1s, box-shadow 0.2s;
-    box-shadow: 0 0 0 0 rgba(91,143,255,0);
-    -webkit-tap-highlight-color: transparent;
-  }
-
-  #micBtn:active { transform: scale(0.94); }
-
-  #micBtn.listening {
-    background: #1a2a50;
-    box-shadow: 0 0 0 12px rgba(91,143,255,0.15), 0 0 0 24px rgba(91,143,255,0.06);
-    animation: pulse 1.6s ease-in-out infinite;
-  }
-
-  @keyframes pulse {
-    0%, 100% { box-shadow: 0 0 0 10px rgba(91,143,255,0.12), 0 0 0 22px rgba(91,143,255,0.05); }
-    50%       { box-shadow: 0 0 0 16px rgba(91,143,255,0.18), 0 0 0 30px rgba(91,143,255,0.07); }
-  }
-
-  #micBtn svg { transition: fill 0.2s; }
-
-  #statusText {
-    font-size: 13px;
-    color: #6b7280;
-    text-align: center;
-    min-height: 18px;
-    transition: color 0.2s;
-  }
-
-  #statusText.active { color: #5b8fff; }
-  #statusText.error  { color: #f87171; }
-
-  /* Interim / live transcript */
-  #interim {
-    min-height: 28px;
-    font-size: 14px;
-    color: #9ca3af;
-    font-style: italic;
-    text-align: center;
-    padding: 0 4px;
-  }
-
-  /* Final transcript */
-  #transcript {
-    width: 100%;
-    min-height: 120px;
-    background: #0f1117;
-    border: 1px solid #2a2d3a;
-    border-radius: 10px;
-    padding: 14px;
-    font-size: 15px;
-    color: #e8eaf0;
-    line-height: 1.6;
-    resize: vertical;
-    font-family: inherit;
-    margin-top: 4px;
-  }
-
-  #transcript:focus {
-    outline: none;
-    border-color: #5b8fff;
-  }
-
-  /* Action row */
-  .actions {
-    display: flex;
-    gap: 10px;
-    margin-top: 12px;
-  }
-
-  .btn {
-    flex: 1;
-    padding: 12px;
-    border-radius: 10px;
-    border: none;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    -webkit-tap-highlight-color: transparent;
-    transition: opacity 0.15s;
-  }
-
-  .btn:active { opacity: 0.75; }
-
-  .btn-secondary {
-    background: #1e2235;
-    color: #9ca3af;
-    border: 1px solid #2a2d3a;
-  }
-
-  .btn-primary {
-    background: #5b8fff;
-    color: #fff;
-  }
-
-  /* Info panel */
-  .info-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-  }
-
-  .info-item {
-    background: #0f1117;
-    border-radius: 10px;
-    padding: 12px;
-  }
-
-  .info-item .label {
-    font-size: 10px;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: #4b5563;
-    margin-bottom: 4px;
-  }
-
-  .info-item .value {
-    font-size: 14px;
-    font-weight: 600;
-    color: #e8eaf0;
-  }
-
-  .value.ok   { color: #34d399; }
-  .value.warn { color: #fbbf24; }
-  .value.bad  { color: #f87171; }
-
-  /* Word count */
-  #wordCount { color: #4b5563; font-size: 12px; margin-top: 6px; text-align: right; }
-
-  /* Toast */
-  #toast {
-    position: fixed;
-    bottom: 28px;
-    left: 50%;
-    transform: translateX(-50%) translateY(80px);
-    background: #34d399;
-    color: #0f1117;
-    font-size: 13px;
-    font-weight: 700;
-    padding: 10px 22px;
-    border-radius: 50px;
-    transition: transform 0.3s ease;
-    pointer-events: none;
-    white-space: nowrap;
-  }
-
-  #toast.show { transform: translateX(-50%) translateY(0); }
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+:root {
+  --bg: #0f1117; --surface: #1a1d27; --border: #2a2d3a;
+  --accent: #5b8fff; --accent-dim: rgba(91,143,255,0.12);
+  --text: #e8eaf0; --muted: #6b7280;
+  --green: #34d399; --red: #f87171; --yellow: #fbbf24; --orange: #fb923c;
+}
+body { font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding: 20px 16px 80px; }
+header { text-align: center; margin-bottom: 24px; }
+.logo { font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent); font-weight: 600; margin-bottom: 6px; }
+h1 { font-size: 22px; font-weight: 700; letter-spacing: -0.02em; }
+h1 span { color: var(--accent); }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 20px; margin-bottom: 14px; }
+.card-label { font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent); font-weight: 600; margin-bottom: 12px; }
+input[type=password], select {
+  width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: 10px;
+  padding: 12px 14px; font-size: 15px; color: var(--text); font-family: inherit; appearance: none; -webkit-appearance: none;
+}
+input:focus, select:focus { outline: none; border-color: var(--accent); }
+select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236b7280' d='M6 8L1 3h10z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; padding-right: 36px; }
+select option { background: #1a1d27; }
+textarea { width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; font-size: 15px; color: var(--text); font-family: inherit; resize: vertical; }
+textarea:focus { outline: none; border-color: var(--accent); }
+.tabs { display: flex; gap: 8px; margin-bottom: 16px; }
+.tab { flex: 1; padding: 10px; border-radius: 10px; border: 1px solid var(--border); background: var(--surface); color: var(--muted); font-size: 13px; font-weight: 600; cursor: pointer; text-align: center; transition: all 0.15s; }
+.tab.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+.mic-wrap { display: flex; flex-direction: column; align-items: center; gap: 14px; padding: 8px 0; }
+#micBtn { width: 80px; height: 80px; border-radius: 50%; border: none; background: #1e2235; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.2s, box-shadow 0.2s; }
+#micBtn.listening { background: #1a2a50; animation: pulse 1.6s ease-in-out infinite; }
+@keyframes pulse { 0%,100% { box-shadow: 0 0 0 10px rgba(91,143,255,0.12); } 50% { box-shadow: 0 0 0 18px rgba(91,143,255,0.18); } }
+#statusText { font-size: 13px; color: var(--muted); text-align: center; }
+#statusText.active { color: var(--accent); }
+#statusText.error { color: var(--red); }
+#interim { font-size: 13px; color: #9ca3af; font-style: italic; text-align: center; min-height: 18px; }
+.file-btn { width: 100%; padding: 14px; border-radius: 10px; border: 1px dashed var(--border); background: var(--bg); color: var(--muted); font-size: 14px; font-weight: 600; cursor: pointer; text-align: center; }
+#photoPreview { width: 100%; border-radius: 10px; display: none; margin-top: 10px; }
+.btn-row { display: flex; gap: 10px; margin-top: 12px; }
+.btn { flex: 1; padding: 13px; border-radius: 10px; border: none; font-size: 14px; font-weight: 700; cursor: pointer; transition: opacity 0.15s; font-family: inherit; }
+.btn:active { opacity: 0.75; }
+.btn-primary { background: var(--accent); color: #fff; }
+.btn-secondary { background: var(--surface); color: var(--muted); border: 1px solid var(--border); }
+.btn-green { background: var(--green); color: #0f1117; }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+#loadingState { text-align: center; padding: 30px; display: none; }
+.spinner { width: 36px; height: 36px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 12px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+#resultsSection { display: none; }
+.visit-group { margin-bottom: 18px; }
+.visit-header { font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 700; margin-bottom: 8px; padding: 6px 10px; border-radius: 8px; }
+.visit-header.treatment { color: var(--accent); background: var(--accent-dim); }
+.visit-header.watch { color: var(--yellow); background: rgba(251,191,36,0.1); }
+.visit-header.existing { color: var(--orange); background: rgba(251,146,60,0.1); }
+.visit-header.delivery { color: var(--green); background: rgba(52,211,153,0.1); }
+.procedure-row { background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; margin-bottom: 6px; position: relative; }
+.procedure-row.is-watch { border-color: rgba(251,191,36,0.3); }
+.procedure-row.is-existing { border-color: rgba(251,146,60,0.3); }
+.proc-code { font-size: 13px; font-weight: 700; color: var(--accent); margin-bottom: 2px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.proc-desc { font-size: 13px; color: var(--text); margin-bottom: 4px; }
+.proc-meta { font-size: 11px; color: var(--muted); margin-bottom: 2px; }
+.proc-provider { font-size: 10px; color: var(--muted); }
+.proc-provider.override { color: var(--yellow); }
+tag { display: inline-block; padding: 1px 7px; border-radius: 20px; font-size: 10px; font-weight: 700; }
+tag.auto { background: rgba(91,143,255,0.15); color: var(--accent); }
+tag.delivery { background: rgba(52,211,153,0.12); color: var(--green); }
+tag.watch { background: rgba(251,191,36,0.15); color: var(--yellow); }
+tag.existing { background: rgba(251,146,60,0.15); color: var(--orange); }
+tag.low { background: rgba(248,113,113,0.15); color: var(--red); }
+.delete-btn { position: absolute; top: 10px; right: 10px; background: none; border: none; color: var(--muted); font-size: 18px; cursor: pointer; padding: 2px 6px; line-height: 1; }
+.delete-btn:hover { color: var(--red); }
+#toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px); background: var(--green); color: #0f1117; font-size: 13px; font-weight: 700; padding: 10px 22px; border-radius: 50px; transition: transform 0.3s; pointer-events: none; white-space: nowrap; z-index: 999; }
+#toast.show { transform: translateX(-50%) translateY(0); }
+#toast.error { background: var(--red); color: #fff; }
+.row-count { font-size: 12px; color: var(--muted); margin-top: 4px; }
+.provider-select-wrap { display: flex; align-items: center; gap: 10px; }
+.provider-select-wrap label { font-size: 12px; color: var(--muted); white-space: nowrap; flex-shrink: 0; }
 </style>
 </head>
 <body>
 
 <header>
   <div class="logo">Tooth Brothers</div>
-  <h1>Dictation <span>Test</span></h1>
-  <p class="subtitle">WebKit Speech API · Safari iPhone</p>
+  <h1>Treatment <span>Plan</span></h1>
 </header>
 
-<!-- Browser support info -->
-<div class="card">
-  <div class="card-label">Environment Check</div>
-  <div class="info-grid">
-    <div class="info-item">
-      <div class="label">Speech API</div>
-      <div class="value" id="apiSupport">—</div>
+<!-- Setup -->
+<div id="setupScreen" style="max-width:440px;margin:0 auto;">
+  <div class="card">
+    <div class="card-label">API Key</div>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:12px;">Enter your Anthropic API key. Stored on this device only.</p>
+    <input type="password" id="apiKeyInput" placeholder="sk-ant-..." autocomplete="off" spellcheck="false">
+    <div class="btn-row"><button class="btn btn-primary" id="saveKeyBtn">Save & Continue</button></div>
+  </div>
+  <p style="font-size:11px;color:var(--muted);text-align:center;">Use Chrome on iPhone for microphone support.</p>
+</div>
+
+<!-- App -->
+<div id="appScreen" style="max-width:440px;margin:0 auto;display:none;">
+
+  <!-- Provider -->
+  <div class="card" style="padding:14px 20px;">
+    <div class="provider-select-wrap">
+      <label>Provider</label>
+      <select id="providerSelect">
+        <option value="Adam Tow" selected>Adam Tow</option>
+        <option value="Ari Tow">Ari Tow</option>
+      </select>
     </div>
-    <div class="info-item">
-      <div class="label">Browser</div>
-      <div class="value" id="browserName">—</div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <div class="tab active" data-tab="dictate">🎙 Dictate</div>
+    <div class="tab" data-tab="photo">📷 Photo</div>
+    <div class="tab" data-tab="type">⌨️ Type</div>
+  </div>
+
+  <!-- Dictate -->
+  <div id="tab-dictate">
+    <div class="card">
+      <div class="card-label">Dictation</div>
+      <div class="mic-wrap">
+        <button id="micBtn">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
+            <rect x="9" y="2" width="6" height="13" rx="3" fill="#5b8fff"/>
+            <path d="M5 11a7 7 0 0 0 14 0" stroke="#5b8fff" stroke-width="2" stroke-linecap="round" fill="none"/>
+            <line x1="12" y1="18" x2="12" y2="22" stroke="#5b8fff" stroke-width="2" stroke-linecap="round"/>
+            <line x1="8" y1="22" x2="16" y2="22" stroke="#5b8fff" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </button>
+        <div id="statusText">Tap to record</div>
+        <div id="interim"></div>
+      </div>
+      <textarea id="dictateText" style="min-height:90px;margin-top:10px;" placeholder="Dictated text appears here — edit before parsing…"></textarea>
+      <div class="btn-row">
+        <button class="btn btn-secondary" id="clearDictate">Clear</button>
+        <button class="btn btn-primary" id="parseDictate">Parse →</button>
+      </div>
     </div>
-    <div class="info-item">
-      <div class="label">Platform</div>
-      <div class="value" id="platform">—</div>
+  </div>
+
+  <!-- Photo -->
+  <div id="tab-photo" style="display:none">
+    <div class="card">
+      <div class="card-label">Photo</div>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:10px;">Snap a handwritten or printed treatment plan.</p>
+      <input type="file" id="photoInput" accept="image/*" capture="environment" style="display:none">
+      <button class="file-btn" id="photoPickerBtn">📷 Take Photo or Choose Image</button>
+      <img id="photoPreview">
+      <div class="btn-row" style="margin-top:12px;">
+        <button class="btn btn-secondary" id="clearPhoto">Clear</button>
+        <button class="btn btn-primary" id="parsePhoto" disabled>Parse →</button>
+      </div>
     </div>
-    <div class="info-item">
-      <div class="label">Continuous</div>
-      <div class="value" id="continuous">—</div>
+  </div>
+
+  <!-- Type -->
+  <div id="tab-type" style="display:none">
+    <div class="card">
+      <div class="card-label">Manual Entry</div>
+      <textarea id="typeText" style="min-height:140px;" placeholder="e.g. crown #3, SRP 4Q split, EMBI #19, #10M(w)…"></textarea>
+      <div class="btn-row">
+        <button class="btn btn-secondary" id="clearType">Clear</button>
+        <button class="btn btn-primary" id="parseType">Parse →</button>
+      </div>
     </div>
+  </div>
+
+  <!-- Patient notes -->
+  <div class="card" style="margin-top:0">
+    <div class="card-label">Patient Notes <span style="font-weight:400;text-transform:none;font-size:10px;color:var(--muted)">(optional — appended to CSV)</span></div>
+    <textarea id="patientNotes" style="min-height:56px;" placeholder="Patient name, DOB, date…"></textarea>
+  </div>
+
+  <!-- Loading -->
+  <div id="loadingState">
+    <div class="spinner"></div>
+    <div style="font-size:14px;color:var(--muted);">Parsing with Claude…</div>
+  </div>
+
+  <!-- Results -->
+  <div id="resultsSection">
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;">
+        <div>
+          <div style="font-size:15px;font-weight:700;">Parsed Plan</div>
+          <div class="row-count" id="rowCount"></div>
+        </div>
+      </div>
+      <div id="procedureList"></div>
+      <div class="btn-row" style="margin-top:14px;">
+        <button class="btn btn-secondary" id="resetBtn">← New Plan</button>
+        <button class="btn btn-green" id="exportBtn">Copy CSV</button>
+      </div>
+    </div>
+  </div>
+
+  <div style="text-align:center;margin-top:12px;">
+    <button id="changeKeyBtn" style="background:none;border:none;color:var(--muted);font-size:12px;cursor:pointer;">Change API Key</button>
   </div>
 </div>
 
-<!-- Mic -->
-<div class="card">
-  <div class="card-label">Dictation</div>
-  <div class="mic-wrap">
-    <button id="micBtn" aria-label="Start recording">
-      <svg id="micIcon" width="36" height="36" viewBox="0 0 24 24" fill="none">
-        <rect x="9" y="2" width="6" height="13" rx="3" fill="#5b8fff"/>
-        <path d="M5 11a7 7 0 0 0 14 0" stroke="#5b8fff" stroke-width="2" stroke-linecap="round" fill="none"/>
-        <line x1="12" y1="18" x2="12" y2="22" stroke="#5b8fff" stroke-width="2" stroke-linecap="round"/>
-        <line x1="8" y1="22" x2="16" y2="22" stroke="#5b8fff" stroke-width="2" stroke-linecap="round"/>
-      </svg>
-    </button>
-    <div id="statusText">Tap to start recording</div>
-    <div id="interim"></div>
-  </div>
-</div>
-
-<!-- Transcript -->
-<div class="card">
-  <div class="card-label">Transcript</div>
-  <textarea id="transcript" placeholder="Dictated text will appear here…" spellcheck="false"></textarea>
-  <div id="wordCount">0 words</div>
-  <div class="actions">
-    <button class="btn btn-secondary" id="clearBtn">Clear</button>
-    <button class="btn btn-primary" id="copyBtn">Copy Text</button>
-  </div>
-</div>
-
-<div id="toast">Copied!</div>
+<div id="toast"></div>
 
 <script>
-  // ── Environment detection ──────────────────────────────────────────────────
-  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+const SYSTEM_PROMPT = `You are a dental treatment plan parser for Tooth Brothers dental practice. Parse dictated or typed treatment plans into structured JSON rows for Curve Hero EHR.
 
-  const ua = navigator.userAgent;
-  const isIOS = /iPhone|iPad|iPod/.test(ua);
-  const isSafari = /Safari/.test(ua) && !/Chrome/.test(ua);
-  const isChromeIOS = /CriOS/.test(ua);
+## OUTPUT FORMAT
+Return ONLY a valid JSON array, no markdown. Each object:
+{
+  "visit": "Visit 1",
+  "code": "D2740",
+  "description": "Crown, porcelain/ceramic",
+  "tooth": "16",
+  "material": "Zirconia",
+  "surfaces": "",
+  "provider": "Adam Tow",
+  "notes": "",
+  "confidence": "high",
+  "auto": false,
+  "delivery": false,
+  "status": "treatment"
+}
 
-  document.getElementById('apiSupport').textContent = SpeechRecognition ? 'Supported' : 'Not supported';
-  document.getElementById('apiSupport').className = 'value ' + (SpeechRecognition ? 'ok' : 'bad');
+status values: "treatment" | "watch" | "existing"
+- treatment = active planned procedure
+- watch = monitoring, not yet planned (triggers: "(w)", "watch", "monitor")
+- existing = charting existing restoration (triggers: "existing", "has a", "there's a", "old [restoration]")
 
-  document.getElementById('browserName').textContent = isChromeIOS ? 'Chrome iOS' : isSafari ? 'Safari' : 'Other';
-  document.getElementById('browserName').className = 'value ' + (isSafari || isChromeIOS ? 'warn' : 'ok');
+WATCH rows: code="WATCH", visit="Watch / Monitor", no auto-adds
+EXISTING rows: code="EXISTING", visit="Existing Tx", no auto-adds
 
-  document.getElementById('platform').textContent = isIOS ? 'iOS' : 'Desktop';
-  document.getElementById('platform').className = 'value ' + (isIOS ? 'ok' : 'warn');
+## PROVIDER RULES
+Default provider is passed in by the app. Override as follows regardless of selection:
 
-  // We'll test continuous support experimentally
-  document.getElementById('continuous').textContent = 'Testing…';
+Always Adam Tow:
+- Implants all stages (D6010, D6011, D6057, D6065, D6067, and all implant codes)
+- Guards (D9944, D9945, D9946)
+- Complete/immediate dentures (D5110, D5120, D5130, D5140)
+- All removable partials (D5211-D5214, D5225, D5226, RPD, UPD, LPD, flexi, metal framework)
 
-  // ── Recognition setup ─────────────────────────────────────────────────────
-  const statusEl   = document.getElementById('statusText');
-  const interimEl  = document.getElementById('interim');
-  const transcriptEl = document.getElementById('transcript');
-  const micBtn     = document.getElementById('micBtn');
-  const wordCountEl = document.getElementById('wordCount');
+Always Ari Tow:
+- Root canals (D3310, D3320, D3330)
+- Retreatments (D3346, D3347, D3348)
+- Pulpotomy (D3220, D3221)
+- Apexification (D3351-D3353)
+- Pulpal regeneration (D3355-D3357)
 
-  let recognition = null;
-  let listening = false;
-  let finalText = '';
+Follow selected provider (NO override):
+- Pulp caps (D3110, D3120) including "limelight"
+- All other procedures
 
-  function updateWordCount() {
-    const words = transcriptEl.value.trim().split(/\s+/).filter(Boolean).length;
-    wordCountEl.textContent = words + (words === 1 ? ' word' : ' words');
-  }
+## AUTOMATIC ADD-ONS (mark auto:true)
 
-  if (SpeechRecognition) {
-    recognition = new SpeechRecognition();
-    recognition.lang = 'en-US';
-    recognition.interimResults = true;
-    recognition.maxAlternatives = 1;
+CROWNS - add to same visit:
+- D2950 Core Buildup (same tooth)
+- "Material Upgrade Fee" custom code (same tooth)
+Then add delivery visit row (delivery:true):
+- Regular crown → code="Crown Delivery", visit="Crown Delivery"
+- Implant crown → code="Implant Crown Delivery", visit="Implant Crown Delivery"
+- Onlay → code="Onlay Delivery", visit="Onlay Delivery"
+- Veneer → code="Veneer Delivery", visit="Veneer Delivery"
+- Bridge → code="Bridge Delivery", visit="Bridge Delivery"
+- RPD/partial → code="RPD delivery", visit="RPD Delivery"
+- Denture → code="Denture Delivery Complete", visit="Denture Delivery"
+- Guard → code="occlusal/night guard delivery", visit="Guard Delivery"
+- Retainer → code="Retainer Delivery", visit="Retainer Delivery"
 
-    // Try continuous; iOS Safari ignores this silently
-    recognition.continuous = false;
+FILLINGS - add to same visit:
+- D9910 Desensitizing Medicament (same tooth, same visit)
+Applies to: D2140-D2161, D2330-D2335, D2391-D2394
 
-    // Detect if continuous actually worked
-    setTimeout(() => {
-      document.getElementById('continuous').textContent = recognition.continuous ? 'Yes' : 'No (iOS)';
-      document.getElementById('continuous').className = 'value ' + (recognition.continuous ? 'ok' : 'warn');
-    }, 100);
+EXTRACTION - always means D7210 (surgical), never D7140:
+- Auto-add D7922 surgical dressing (same visit, auto:true)
+- Add D7953 bone graft if mentioned (same visit)
+- Add D7921 PRF if PRF mentioned (same visit)
 
-    recognition.onstart = () => {
-      listening = true;
-      micBtn.classList.add('listening');
-      statusEl.textContent = 'Listening… speak now';
-      statusEl.className = 'active';
-    };
+IMPLANT PLACEMENT (D6010, "placing implant", "implant body", EMBI):
+Generate these visits automatically:
+Visit "Implant Surgery": D6010 + D7922 (auto) + D7953 bone graft (auto) + D7921 if PRF mentioned
+Visit "Implant Uncovery": D6011 (auto)
+Visit "Implant Restorative": D6057 (auto) + D6065 (auto) + Material Upgrade Fee (auto)
+Visit "Implant Crown Delivery": code="Implant Crown Delivery" (auto, delivery:true)
+All implant rows → provider: Adam Tow
 
-    recognition.onresult = (e) => {
-      let interim = '';
-      let final = '';
-      for (let i = e.resultIndex; i < e.results.length; i++) {
-        const t = e.results[i][0].transcript;
-        if (e.results[i].isFinal) final += t;
-        else interim += t;
-      }
-      interimEl.textContent = interim;
-      if (final) {
-        finalText += (finalText ? ' ' : '') + final.trim();
-        transcriptEl.value = finalText;
-        updateWordCount();
-        interimEl.textContent = '';
-      }
-    };
+IMPLANT CROWN ONLY (no surgery):
+- D6057 abutment + D6065 crown (same visit)
+- Material Upgrade Fee (same visit, auto)
+- Implant Crown Delivery visit (auto, delivery)
 
-    recognition.onerror = (e) => {
-      console.error('Speech error:', e.error);
-      let msg = 'Error: ' + e.error;
-      if (e.error === 'not-allowed') msg = 'Mic permission denied — check Settings';
-      if (e.error === 'no-speech')   msg = 'No speech detected — try again';
-      statusEl.textContent = msg;
-      statusEl.className = 'error';
-      stopListening();
-    };
+## SURGICAL ACRONYMS
+EBM = D7210 + D7953 + D7922, single visit
+EMBI = D7210 + D7953 + D7922 + D6010, then auto-generate Uncovery + Restorative + Delivery visits
+PRF = D7921, add to surgical visit when mentioned
 
-    recognition.onend = () => {
-      stopListening();
-      if (finalText) {
-        statusEl.textContent = 'Done — tap again to continue';
-      } else {
-        statusEl.textContent = 'Tap to start recording';
-      }
-      statusEl.className = '';
-      interimEl.textContent = '';
-    };
+## SRP RULES
+4Q one day ("SRP 4Q", "full mouth SRP", "FMSRP"): D4341 × UR, UL, LR, LL — all Visit 1
+4Q split ("SRP 4Q two visits", "SRP split"): Visit "SRP Right": D4341 UR+LR; Visit "SRP Left": D4341 UL+LL
+SRP upper → UR+UL; SRP lower → LR+LL; SRP right → UR+LR; SRP left → UL+LL
+1-3 teeth: D4342
+
+## SURFACE / TOOTH NOTATION
+#10M = tooth 10 mesial → composite 1 surface (D2391) + D9910
+#10MOD = tooth 10 MOD → 3 surface composite (D2393) + D9910
+#10M(w) = WATCH on tooth 10 mesial
+#10M RBC / #10M compo / #10M filling = treatment composite
+
+## SHORTHAND MAPPING
+crown → D2740 + auto-adds
+PFM → D2750 + auto-adds
+gold/cast crown → D2790 + auto-adds
+implant crown → D6065 + D6057 + auto-adds (Adam)
+placing implant → full 4-visit sequence (Adam)
+onlay → D2642-D2644 by surfaces + Onlay Delivery
+veneer → D2962 + Veneer Delivery
+filling/composite/white filling → D2391 1-surf default + D9910
+MOD → D2393 + D9910; DO/MO → D2392 + D9910
+amalgam → D2140-D2161 by surface count + D9910
+buildup/build up → D2950
+RPD/upper partial/UPD → D5213 (Adam)
+LPD/lower partial → D5214 (Adam)
+flexi/flexite upper → D5225 (Adam); lower → D5226 (Adam)
+complete denture upper → D5110 (Adam); lower → D5120 (Adam)
+root canal molar/RCT/endo molar → D3330 (Ari)
+root canal premolar → D3320 (Ari)
+root canal anterior → D3310 (Ari)
+limelight → D3120 indirect pulp cap (selected provider)
+gluma → D9910
+extraction/ext/exo → D7210 + D7922 auto
+sinus lift/sinus aug → D7951
+bone graft → D7953 default
+pano → D0330; FMX → D0210; BW/BWX → D0274; PA → D0220
+CBCT/cone beam → D0367 both jaws default
+comp exam → D0150; periodic/recall → D0120; limited → D0140
+prophy adult → D1110; child → D1120
+perio maint → D4910; FMD → D4355
+sealant → D1351; fluoride → D1206; nitrous → D9230
+o-guard/night guard → D9944 (Adam) + Guard Delivery
+material upgrade → "Material Upgrade Fee"
+PRF → D7921
+
+SPEECH MISHEARS:
+"Jim plan"/"dream plan" = treatment plan header, not a procedure
+"flex he"/"flexi" = Flexite partial
+"UPD" = D5213; "LPD" = D5214
+"RCT"/"endo" = root canal
+"ext"/"exo" = extraction D7210
+"sinus lift" = D7951
+"FMD" = D4355; "FMX" = D0210
+"o-guard" = D9944
+"perio maint" = D4910
+"limelight" = D3120
+"gluma" = D9910
+"PRF" = D7921
+"EBM" = extraction+graft+membrane
+"EMBI" = extraction+graft+membrane+immediate implant
+
+Multiple teeth same procedure: one row per tooth, each with full auto-adds.
+Unknown code: use D9999, confidence:"low".`;
+
+// ── State ──────────────────────────────────────────────────────────────────
+let apiKey = localStorage.getItem('tb_api_key') || '';
+let procedures = [];
+let photoBase64 = null, photoMimeType = null;
+
+if (apiKey) showApp(); else showSetup();
+function showSetup() { document.getElementById('setupScreen').style.display='block'; document.getElementById('appScreen').style.display='none'; }
+function showApp()   { document.getElementById('setupScreen').style.display='none';  document.getElementById('appScreen').style.display='block'; }
+
+document.getElementById('saveKeyBtn').addEventListener('click', () => {
+  const k = document.getElementById('apiKeyInput').value.trim();
+  if (!k.startsWith('sk-')) { showToast('Enter a valid API key', true); return; }
+  apiKey = k; localStorage.setItem('tb_api_key', k); showApp();
+});
+document.getElementById('changeKeyBtn').addEventListener('click', () => { document.getElementById('apiKeyInput').value=apiKey; showSetup(); });
+
+// ── Tabs ───────────────────────────────────────────────────────────────────
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    ['dictate','photo','type'].forEach(id => { document.getElementById('tab-'+id).style.display = id===tab.dataset.tab?'block':'none'; });
+  });
+});
+
+// ── Speech ─────────────────────────────────────────────────────────────────
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+let recognition=null, listening=false, finalText='';
+if (SR) {
+  recognition = new SR(); recognition.lang='en-US'; recognition.interimResults=true; recognition.continuous=false;
+  recognition.onstart = () => { listening=true; document.getElementById('micBtn').classList.add('listening'); document.getElementById('statusText').textContent='Listening…'; document.getElementById('statusText').className='active'; };
+  recognition.onresult = e => { let interim='',final=''; for(let i=e.resultIndex;i<e.results.length;i++){const t=e.results[i][0].transcript;if(e.results[i].isFinal)final+=t;else interim+=t;} document.getElementById('interim').textContent=interim; if(final){finalText+=(finalText?' ':'')+final.trim();document.getElementById('dictateText').value=finalText;document.getElementById('interim').textContent='';} };
+  recognition.onerror = e => { let m='Error: '+e.error; if(e.error==='not-allowed')m='Mic blocked — check Chrome permissions'; if(e.error==='no-speech')m='No speech — tap again'; document.getElementById('statusText').textContent=m; document.getElementById('statusText').className='error'; stopRec(); };
+  recognition.onend = () => { stopRec(); document.getElementById('statusText').textContent=finalText?'Done — tap to continue':'Tap to record'; document.getElementById('statusText').className=''; document.getElementById('interim').textContent=''; };
+}
+function stopRec() { listening=false; document.getElementById('micBtn').classList.remove('listening'); }
+document.getElementById('micBtn').addEventListener('click', () => {
+  if (!recognition) { showToast('Use Chrome for mic support', true); return; }
+  if (listening) { recognition.stop(); return; }
+  finalText = document.getElementById('dictateText').value;
+  try { recognition.start(); } catch(e) { document.getElementById('statusText').textContent='Could not start — try again'; document.getElementById('statusText').className='error'; }
+});
+document.getElementById('clearDictate').addEventListener('click', () => { document.getElementById('dictateText').value=''; document.getElementById('interim').textContent=''; finalText=''; document.getElementById('statusText').textContent='Tap to record'; document.getElementById('statusText').className=''; });
+
+// ── Photo ──────────────────────────────────────────────────────────────────
+document.getElementById('photoPickerBtn').addEventListener('click', () => document.getElementById('photoInput').click());
+document.getElementById('photoInput').addEventListener('change', e => {
+  const file=e.target.files[0]; if(!file) return; photoMimeType=file.type||'image/jpeg';
+  const reader=new FileReader(); reader.onload=ev=>{const d=ev.target.result;photoBase64=d.split(',')[1];const p=document.getElementById('photoPreview');p.src=d;p.style.display='block';document.getElementById('parsePhoto').disabled=false;}; reader.readAsDataURL(file);
+});
+document.getElementById('clearPhoto').addEventListener('click', () => { photoBase64=null; document.getElementById('photoPreview').style.display='none'; document.getElementById('photoPreview').src=''; document.getElementById('parsePhoto').disabled=true; document.getElementById('photoInput').value=''; });
+
+// ── Parse triggers ─────────────────────────────────────────────────────────
+document.getElementById('parseDictate').addEventListener('click', () => { const t=document.getElementById('dictateText').value.trim(); if(!t){showToast('Dictate something first',true);return;} callClaude({type:'text',content:t}); });
+document.getElementById('parseType').addEventListener('click',    () => { const t=document.getElementById('typeText').value.trim(); if(!t){showToast('Enter a treatment plan',true);return;} callClaude({type:'text',content:t}); });
+document.getElementById('parsePhoto').addEventListener('click',   () => { if(!photoBase64){showToast('Take a photo first',true);return;} callClaude({type:'image',base64:photoBase64,mimeType:photoMimeType}); });
+
+// ── Claude API ─────────────────────────────────────────────────────────────
+async function callClaude(input) {
+  if (!apiKey) { showToast('No API key set', true); return; }
+  const provider = document.getElementById('providerSelect').value;
+  document.getElementById('loadingState').style.display='block';
+  document.getElementById('resultsSection').style.display='none';
+
+  let userContent;
+  if (input.type==='text') {
+    userContent = `Selected provider (default for unspecified procedures): ${provider}\n\nParse this dental treatment plan:\n\n"${input.content}"`;
   } else {
-    micBtn.disabled = true;
-    statusEl.textContent = 'Speech API not available in this browser';
-    statusEl.className = 'error';
+    userContent = [
+      {type:'image', source:{type:'base64', media_type:input.mimeType, data:input.base64}},
+      {type:'text', text:`Selected provider: ${provider}\n\nExtract all dental procedures, watches, and existing tx from this image. Return structured JSON.`}
+    ];
   }
 
-  function stopListening() {
-    listening = false;
-    micBtn.classList.remove('listening');
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({model:'claude-sonnet-4-6', max_tokens:2500, system:SYSTEM_PROMPT, messages:[{role:'user',content:userContent}]})
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error.message);
+    const raw = data.content.map(b=>b.text||'').join('');
+    const clean = raw.replace(/```json|```/g,'').trim();
+    procedures = JSON.parse(clean);
+    renderResults();
+  } catch(err) {
+    showToast('Parse failed: '+err.message, true);
+    console.error(err);
+  } finally {
+    document.getElementById('loadingState').style.display='none';
   }
+}
 
-  micBtn.addEventListener('click', () => {
-    if (!recognition) return;
-    if (listening) {
-      recognition.stop();
-    } else {
-      finalText = transcriptEl.value; // preserve existing text
-      try {
-        recognition.start();
-      } catch(e) {
-        statusEl.textContent = 'Could not start — try again';
-        statusEl.className = 'error';
-      }
-    }
+// ── Render ─────────────────────────────────────────────────────────────────
+function renderResults() {
+  const list = document.getElementById('procedureList');
+  list.innerHTML = '';
+  const selectedProvider = document.getElementById('providerSelect').value;
+
+  // Group by visit, preserve order
+  const visitOrder = [], visitMap = {};
+  procedures.forEach((p,i) => {
+    const v = p.visit || 'Visit 1';
+    if (!visitMap[v]) { visitMap[v]=[]; visitOrder.push(v); }
+    visitMap[v].push({...p, _idx:i});
   });
 
-  // ── Utility buttons ────────────────────────────────────────────────────────
-  document.getElementById('clearBtn').addEventListener('click', () => {
-    transcriptEl.value = '';
-    finalText = '';
-    interimEl.textContent = '';
-    updateWordCount();
-    statusEl.textContent = 'Tap to start recording';
-    statusEl.className = '';
+  visitOrder.forEach(visitName => {
+    const rows = visitMap[visitName];
+    const isWatch    = rows.some(r=>r.status==='watch');
+    const isExisting = rows.some(r=>r.status==='existing');
+    const isDelivery = rows.some(r=>r.delivery);
+    const headerClass = isWatch ? 'watch' : isExisting ? 'existing' : isDelivery ? 'delivery' : 'treatment';
+
+    const vg = document.createElement('div');
+    vg.className = 'visit-group';
+    vg.innerHTML = `<div class="visit-header ${headerClass}">${visitName}</div>`;
+
+    rows.forEach(p => {
+      const div = document.createElement('div');
+      div.className = 'procedure-row' + (p.status==='watch'?' is-watch':p.status==='existing'?' is-existing':'');
+
+      const tags = [];
+      if (p.status==='watch')    tags.push('<tag class="watch">WATCH</tag>');
+      if (p.status==='existing') tags.push('<tag class="existing">EXISTING</tag>');
+      if (p.auto && p.status==='treatment') tags.push('<tag class="auto">AUTO</tag>');
+      if (p.delivery)            tags.push('<tag class="delivery">DELIVERY</tag>');
+      if (p.confidence==='low')  tags.push('<tag class="low">⚠ LOW CONF</tag>');
+
+      const meta = [
+        p.tooth ? `#${p.tooth}` : '',
+        p.material || '',
+        p.surfaces || '',
+        p.notes || ''
+      ].filter(Boolean).join(' · ');
+
+      const providerOverridden = p.provider && p.provider !== selectedProvider;
+      const providerLabel = p.provider || selectedProvider;
+
+      div.innerHTML = `
+        <button class="delete-btn" data-idx="${p._idx}">×</button>
+        <div class="proc-code">${p.code} ${tags.join(' ')}</div>
+        <div class="proc-desc">${p.description}</div>
+        ${meta ? `<div class="proc-meta">${meta}</div>` : ''}
+        <div class="proc-provider${providerOverridden?' override':''}">${providerLabel}${providerOverridden?' ↑ overridden':''}</div>`;
+      vg.appendChild(div);
+    });
+
+    list.appendChild(vg);
   });
 
-  const toast = document.getElementById('toast');
-  document.getElementById('copyBtn').addEventListener('click', () => {
-    if (!transcriptEl.value) return;
-    navigator.clipboard.writeText(transcriptEl.value).then(() => {
-      toast.classList.add('show');
-      setTimeout(() => toast.classList.remove('show'), 2000);
-    }).catch(() => {
-      // Fallback for older iOS
-      transcriptEl.select();
-      document.execCommand('copy');
-      toast.classList.add('show');
-      setTimeout(() => toast.classList.remove('show'), 2000);
+  list.querySelectorAll('.delete-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const idx = parseInt(btn.dataset.idx);
+      procedures.splice(idx,1);
+      renderResults();
     });
   });
 
-  transcriptEl.addEventListener('input', updateWordCount);
+  const txCount = procedures.filter(p=>p.status==='treatment').length;
+  const watchCount = procedures.filter(p=>p.status==='watch').length;
+  const existingCount = procedures.filter(p=>p.status==='existing').length;
+  const parts = [`${txCount} tx`];
+  if (watchCount) parts.push(`${watchCount} watch`);
+  if (existingCount) parts.push(`${existingCount} existing`);
+  document.getElementById('rowCount').textContent = parts.join(' · ') + ` across ${visitOrder.length} visit${visitOrder.length!==1?'s':''}`;
+
+  document.getElementById('resultsSection').style.display='block';
+  document.getElementById('resultsSection').scrollIntoView({behavior:'smooth'});
+}
+
+// ── Reset ──────────────────────────────────────────────────────────────────
+document.getElementById('resetBtn').addEventListener('click', () => {
+  procedures=[];
+  document.getElementById('resultsSection').style.display='none';
+  ['dictateText','typeText','patientNotes'].forEach(id=>document.getElementById(id).value='');
+  finalText='';
+  window.scrollTo({top:0,behavior:'smooth'});
+});
+
+// ── Export CSV ─────────────────────────────────────────────────────────────
+document.getElementById('exportBtn').addEventListener('click', () => {
+  if (!procedures.length) { showToast('No procedures to export', true); return; }
+  const notes = document.getElementById('patientNotes').value.trim();
+  const headers = ['Visit','Code','Description','Tooth','Material','Surfaces','Provider','Notes','Status','Patient Notes'];
+  const rows = procedures.map(p => [
+    p.visit||'Visit 1', p.code, p.description,
+    p.tooth||'', p.material||'', p.surfaces||'',
+    p.provider||'Adam Tow', p.notes||'',
+    p.status||'treatment', notes
+  ]);
+  const csv = [headers,...rows].map(row=>row.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
+  navigator.clipboard.writeText(csv).then(()=>showToast('CSV copied!')).catch(()=>{
+    const blob=new Blob([csv],{type:'text/csv'}); const url=URL.createObjectURL(blob);
+    const a=document.createElement('a'); a.href=url; a.download='treatment-plan.csv'; a.click();
+    URL.revokeObjectURL(url); showToast('CSV downloaded!');
+  });
+});
+
+// ── Toast ──────────────────────────────────────────────────────────────────
+function showToast(msg,err=false){const t=document.getElementById('toast');t.textContent=msg;t.className=err?'error show':'show';setTimeout(()=>{t.className=err?'error':'';},3000);}
 </script>
 </body>
 </html>
