@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>TB Dictation Test</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
+    background: #0f1117;
+    color: #e8eaf0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 20px 60px;
+  }
+
+  header {
+    text-align: center;
+    margin-bottom: 36px;
+  }
+
+  .logo {
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #5b8fff;
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+
+  h1 {
+    font-size: 26px;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: -0.02em;
+  }
+
+  h1 span {
+    color: #5b8fff;
+  }
+
+  .subtitle {
+    font-size: 13px;
+    color: #6b7280;
+    margin-top: 6px;
+  }
+
+  .card {
+    background: #1a1d27;
+    border: 1px solid #2a2d3a;
+    border-radius: 16px;
+    padding: 24px;
+    width: 100%;
+    max-width: 420px;
+    margin-bottom: 16px;
+  }
+
+  .card-label {
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #5b8fff;
+    font-weight: 600;
+    margin-bottom: 14px;
+  }
+
+  /* Mic button */
+  .mic-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+  }
+
+  #micBtn {
+    width: 88px;
+    height: 88px;
+    border-radius: 50%;
+    border: none;
+    background: #1e2235;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s, transform 0.1s, box-shadow 0.2s;
+    box-shadow: 0 0 0 0 rgba(91,143,255,0);
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  #micBtn:active { transform: scale(0.94); }
+
+  #micBtn.listening {
+    background: #1a2a50;
+    box-shadow: 0 0 0 12px rgba(91,143,255,0.15), 0 0 0 24px rgba(91,143,255,0.06);
+    animation: pulse 1.6s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 0 0 10px rgba(91,143,255,0.12), 0 0 0 22px rgba(91,143,255,0.05); }
+    50%       { box-shadow: 0 0 0 16px rgba(91,143,255,0.18), 0 0 0 30px rgba(91,143,255,0.07); }
+  }
+
+  #micBtn svg { transition: fill 0.2s; }
+
+  #statusText {
+    font-size: 13px;
+    color: #6b7280;
+    text-align: center;
+    min-height: 18px;
+    transition: color 0.2s;
+  }
+
+  #statusText.active { color: #5b8fff; }
+  #statusText.error  { color: #f87171; }
+
+  /* Interim / live transcript */
+  #interim {
+    min-height: 28px;
+    font-size: 14px;
+    color: #9ca3af;
+    font-style: italic;
+    text-align: center;
+    padding: 0 4px;
+  }
+
+  /* Final transcript */
+  #transcript {
+    width: 100%;
+    min-height: 120px;
+    background: #0f1117;
+    border: 1px solid #2a2d3a;
+    border-radius: 10px;
+    padding: 14px;
+    font-size: 15px;
+    color: #e8eaf0;
+    line-height: 1.6;
+    resize: vertical;
+    font-family: inherit;
+    margin-top: 4px;
+  }
+
+  #transcript:focus {
+    outline: none;
+    border-color: #5b8fff;
+  }
+
+  /* Action row */
+  .actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 12px;
+  }
+
+  .btn {
+    flex: 1;
+    padding: 12px;
+    border-radius: 10px;
+    border: none;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: opacity 0.15s;
+  }
+
+  .btn:active { opacity: 0.75; }
+
+  .btn-secondary {
+    background: #1e2235;
+    color: #9ca3af;
+    border: 1px solid #2a2d3a;
+  }
+
+  .btn-primary {
+    background: #5b8fff;
+    color: #fff;
+  }
+
+  /* Info panel */
+  .info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .info-item {
+    background: #0f1117;
+    border-radius: 10px;
+    padding: 12px;
+  }
+
+  .info-item .label {
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #4b5563;
+    margin-bottom: 4px;
+  }
+
+  .info-item .value {
+    font-size: 14px;
+    font-weight: 600;
+    color: #e8eaf0;
+  }
+
+  .value.ok   { color: #34d399; }
+  .value.warn { color: #fbbf24; }
+  .value.bad  { color: #f87171; }
+
+  /* Word count */
+  #wordCount { color: #4b5563; font-size: 12px; margin-top: 6px; text-align: right; }
+
+  /* Toast */
+  #toast {
+    position: fixed;
+    bottom: 28px;
+    left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: #34d399;
+    color: #0f1117;
+    font-size: 13px;
+    font-weight: 700;
+    padding: 10px 22px;
+    border-radius: 50px;
+    transition: transform 0.3s ease;
+    pointer-events: none;
+    white-space: nowrap;
+  }
+
+  #toast.show { transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">Tooth Brothers</div>
+  <h1>Dictation <span>Test</span></h1>
+  <p class="subtitle">WebKit Speech API · Safari iPhone</p>
+</header>
+
+<!-- Browser support info -->
+<div class="card">
+  <div class="card-label">Environment Check</div>
+  <div class="info-grid">
+    <div class="info-item">
+      <div class="label">Speech API</div>
+      <div class="value" id="apiSupport">—</div>
+    </div>
+    <div class="info-item">
+      <div class="label">Browser</div>
+      <div class="value" id="browserName">—</div>
+    </div>
+    <div class="info-item">
+      <div class="label">Platform</div>
+      <div class="value" id="platform">—</div>
+    </div>
+    <div class="info-item">
+      <div class="label">Continuous</div>
+      <div class="value" id="continuous">—</div>
+    </div>
+  </div>
+</div>
+
+<!-- Mic -->
+<div class="card">
+  <div class="card-label">Dictation</div>
+  <div class="mic-wrap">
+    <button id="micBtn" aria-label="Start recording">
+      <svg id="micIcon" width="36" height="36" viewBox="0 0 24 24" fill="none">
+        <rect x="9" y="2" width="6" height="13" rx="3" fill="#5b8fff"/>
+        <path d="M5 11a7 7 0 0 0 14 0" stroke="#5b8fff" stroke-width="2" stroke-linecap="round" fill="none"/>
+        <line x1="12" y1="18" x2="12" y2="22" stroke="#5b8fff" stroke-width="2" stroke-linecap="round"/>
+        <line x1="8" y1="22" x2="16" y2="22" stroke="#5b8fff" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+    </button>
+    <div id="statusText">Tap to start recording</div>
+    <div id="interim"></div>
+  </div>
+</div>
+
+<!-- Transcript -->
+<div class="card">
+  <div class="card-label">Transcript</div>
+  <textarea id="transcript" placeholder="Dictated text will appear here…" spellcheck="false"></textarea>
+  <div id="wordCount">0 words</div>
+  <div class="actions">
+    <button class="btn btn-secondary" id="clearBtn">Clear</button>
+    <button class="btn btn-primary" id="copyBtn">Copy Text</button>
+  </div>
+</div>
+
+<div id="toast">Copied!</div>
+
+<script>
+  // ── Environment detection ──────────────────────────────────────────────────
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+  const ua = navigator.userAgent;
+  const isIOS = /iPhone|iPad|iPod/.test(ua);
+  const isSafari = /Safari/.test(ua) && !/Chrome/.test(ua);
+  const isChromeIOS = /CriOS/.test(ua);
+
+  document.getElementById('apiSupport').textContent = SpeechRecognition ? 'Supported' : 'Not supported';
+  document.getElementById('apiSupport').className = 'value ' + (SpeechRecognition ? 'ok' : 'bad');
+
+  document.getElementById('browserName').textContent = isChromeIOS ? 'Chrome iOS' : isSafari ? 'Safari' : 'Other';
+  document.getElementById('browserName').className = 'value ' + (isSafari || isChromeIOS ? 'warn' : 'ok');
+
+  document.getElementById('platform').textContent = isIOS ? 'iOS' : 'Desktop';
+  document.getElementById('platform').className = 'value ' + (isIOS ? 'ok' : 'warn');
+
+  // We'll test continuous support experimentally
+  document.getElementById('continuous').textContent = 'Testing…';
+
+  // ── Recognition setup ─────────────────────────────────────────────────────
+  const statusEl   = document.getElementById('statusText');
+  const interimEl  = document.getElementById('interim');
+  const transcriptEl = document.getElementById('transcript');
+  const micBtn     = document.getElementById('micBtn');
+  const wordCountEl = document.getElementById('wordCount');
+
+  let recognition = null;
+  let listening = false;
+  let finalText = '';
+
+  function updateWordCount() {
+    const words = transcriptEl.value.trim().split(/\s+/).filter(Boolean).length;
+    wordCountEl.textContent = words + (words === 1 ? ' word' : ' words');
+  }
+
+  if (SpeechRecognition) {
+    recognition = new SpeechRecognition();
+    recognition.lang = 'en-US';
+    recognition.interimResults = true;
+    recognition.maxAlternatives = 1;
+
+    // Try continuous; iOS Safari ignores this silently
+    recognition.continuous = false;
+
+    // Detect if continuous actually worked
+    setTimeout(() => {
+      document.getElementById('continuous').textContent = recognition.continuous ? 'Yes' : 'No (iOS)';
+      document.getElementById('continuous').className = 'value ' + (recognition.continuous ? 'ok' : 'warn');
+    }, 100);
+
+    recognition.onstart = () => {
+      listening = true;
+      micBtn.classList.add('listening');
+      statusEl.textContent = 'Listening… speak now';
+      statusEl.className = 'active';
+    };
+
+    recognition.onresult = (e) => {
+      let interim = '';
+      let final = '';
+      for (let i = e.resultIndex; i < e.results.length; i++) {
+        const t = e.results[i][0].transcript;
+        if (e.results[i].isFinal) final += t;
+        else interim += t;
+      }
+      interimEl.textContent = interim;
+      if (final) {
+        finalText += (finalText ? ' ' : '') + final.trim();
+        transcriptEl.value = finalText;
+        updateWordCount();
+        interimEl.textContent = '';
+      }
+    };
+
+    recognition.onerror = (e) => {
+      console.error('Speech error:', e.error);
+      let msg = 'Error: ' + e.error;
+      if (e.error === 'not-allowed') msg = 'Mic permission denied — check Settings';
+      if (e.error === 'no-speech')   msg = 'No speech detected — try again';
+      statusEl.textContent = msg;
+      statusEl.className = 'error';
+      stopListening();
+    };
+
+    recognition.onend = () => {
+      stopListening();
+      if (finalText) {
+        statusEl.textContent = 'Done — tap again to continue';
+      } else {
+        statusEl.textContent = 'Tap to start recording';
+      }
+      statusEl.className = '';
+      interimEl.textContent = '';
+    };
+  } else {
+    micBtn.disabled = true;
+    statusEl.textContent = 'Speech API not available in this browser';
+    statusEl.className = 'error';
+  }
+
+  function stopListening() {
+    listening = false;
+    micBtn.classList.remove('listening');
+  }
+
+  micBtn.addEventListener('click', () => {
+    if (!recognition) return;
+    if (listening) {
+      recognition.stop();
+    } else {
+      finalText = transcriptEl.value; // preserve existing text
+      try {
+        recognition.start();
+      } catch(e) {
+        statusEl.textContent = 'Could not start — try again';
+        statusEl.className = 'error';
+      }
+    }
+  });
+
+  // ── Utility buttons ────────────────────────────────────────────────────────
+  document.getElementById('clearBtn').addEventListener('click', () => {
+    transcriptEl.value = '';
+    finalText = '';
+    interimEl.textContent = '';
+    updateWordCount();
+    statusEl.textContent = 'Tap to start recording';
+    statusEl.className = '';
+  });
+
+  const toast = document.getElementById('toast');
+  document.getElementById('copyBtn').addEventListener('click', () => {
+    if (!transcriptEl.value) return;
+    navigator.clipboard.writeText(transcriptEl.value).then(() => {
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2000);
+    }).catch(() => {
+      // Fallback for older iOS
+      transcriptEl.select();
+      document.execCommand('copy');
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2000);
+    });
+  });
+
+  transcriptEl.addEventListener('input', updateWordCount);
+</script>
+</body>
+</html>
